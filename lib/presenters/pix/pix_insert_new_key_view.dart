@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foradacaixab/design_system/button/elevated_button_fc.dart';
@@ -44,7 +44,7 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
                 children: [
                   Text(_definePixKeyNameOnPage(widget.enumPixKeyType), style: Theme.of(context).textTheme.headlineLarge),
                   const Padding(padding: EdgeInsets.only(top: 15.0)),
-                  Text(_definePixKeyDescriptionOnPage(widget.enumPixKeyType), style: Theme.of(context).textTheme.headline6),
+                  Text(_definePixKeyDescriptionOnPage(widget.enumPixKeyType), style: Theme.of(context).textTheme.titleLarge),
                   const Padding(padding: EdgeInsets.only(top: 50.0)),
                   _visibilityCPFCNPJ(),
                   _visibilityAleatoryKey(),
@@ -74,9 +74,9 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('CPF', style: Theme.of(context).textTheme.headline3),
+              Text('CPF', style: Theme.of(context).textTheme.displaySmall),
               const Padding(padding: EdgeInsets.only(top: 5.0)),
-              Text(widget.user.document, style: Theme.of(context).textTheme.headline4)
+              Text(widget.user.document, style: Theme.of(context).textTheme.headlineMedium)
             ],
           ),
         ],
@@ -94,7 +94,7 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Chave aleatória', style: Theme.of(context).textTheme.headline3),
+              Text('Chave aleatória', style: Theme.of(context).textTheme.displaySmall),
             ],
           ),
         ],
@@ -147,8 +147,8 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
         visible: (widget.enumPixKeyType == EnumPixKeyType.telefone)
             ? true
             : (widget.enumPixKeyType == EnumPixKeyType.email)
-                ? true
-                : false,
+            ? true
+            : false,
         child: FloatingActionButton(
           child: const Icon(Icons.navigate_next_rounded),
           onPressed: () async {
@@ -186,7 +186,7 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
 
                   break;
                 case EnumPixKeyType.email:
-                  //TODO: it is not OK, should be similar to telefone block code
+                //TODO: it is not OK, should be similar to telefone block code
                   userPixKey.keyPix = _textPixKeyEmailController.text;
                   userPixKey.idTypePixKey = EnumPixKeyType.email.index;
                   break;
@@ -210,8 +210,8 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
       visible: (widget.enumPixKeyType == EnumPixKeyType.cpf_cnpj)
           ? true
           : (widget.enumPixKeyType == EnumPixKeyType.chave_aleatoria)
-              ? true
-              : false,
+          ? true
+          : false,
       child: Stack(
         children: [
           Container(
@@ -221,13 +221,13 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
                 children: [
                   SingleChildScrollView(
                       child: Column(children: [
-                    Text('Quem usa Pix vai saber que você tem uma chave cadastrada por telefone ou e-mail, mas não terá acesso aos seus dados',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    Text('Quem te pagar por Pix poderá ver seu nome completo e alguns dígitos do seu CPF.',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const Padding(padding: EdgeInsets.only(top: 25.0)),
-                    _elevatedButtonFCRegisterKey()
-                  ])),
+                        Text('Quem usa Pix vai saber que você tem uma chave cadastrada por telefone ou e-mail, mas não terá acesso aos seus dados',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        Text('Quem te pagar por Pix poderá ver seu nome completo e alguns dígitos do seu CPF.',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const Padding(padding: EdgeInsets.only(top: 25.0)),
+                        _elevatedButtonFCRegisterKey()
+                      ])),
                 ],
               )),
           VisibilityShadowFC(isVisible: _loadingIsVisible, height: 200)
@@ -383,8 +383,7 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
         break;
       case EnumPixKeyType.email:
         pixKeyValue = _textPixKeyEmailController.text;
-
-        if (pixKeyValue.isEmpty || pixKeyValue.length < 13) {
+        if (!EmailValidator.validate(pixKeyValue)) {
           await showAlertDialog(
               'Automação Fora da Caixa', 'Formato de email é inválido!', context, 'alertDialogTitle', 'alertDialogMessage', 'alertDialogButtonOk');
           isValid = false;
@@ -423,7 +422,7 @@ class _PixInsertNewKeyViewState extends State<PixInsertNewKeyView> {
         String pixKeyValue = _textPixKeyEmailController.text;
         userPixKey = await _getPixKeyIfExists(pixKeyValue);
 
-        if (pixKeyValue.isEmpty || pixKeyValue.length < 13) {
+        if (!EmailValidator.validate(pixKeyValue)) {
           await showAlertDialog(
               'Automação Fora da Caixa', 'Formato de email é inválido!', context, 'alertDialogTitle', 'alertDialogMessage', 'alertDialogButtonOk');
         } else if (userPixKey != null) {

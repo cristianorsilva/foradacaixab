@@ -1,5 +1,6 @@
 import 'package:cpf_cnpj_validator/cnpj_validator.dart';
 import 'package:cpf_cnpj_validator/cpf_validator.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -41,7 +42,7 @@ class _PixTransferRecipientViewState extends State<PixTransferRecipientView> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(10), topLeft: Radius.circular(10))),
-        title: Text(widget.pageTitle, style: Theme.of(context).textTheme.headline2),
+        title: Text(widget.pageTitle, style: Theme.of(context).textTheme.displayMedium),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -69,47 +70,47 @@ class _PixTransferRecipientViewState extends State<PixTransferRecipientView> {
           padding: const EdgeInsets.all(10),
           child: SingleChildScrollView(
               child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Para quem você deseja transferir?',
-                style: Theme.of(context).textTheme.headline1,
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 25)),
-              Text(
-                'O valor a ser transferido é de:',
-                style: Theme.of(context).textTheme.bodyText2,
-                key: const Key('textValueTransfer'),
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 10)),
-              Text(
-                putCurrencyMask(widget.userTransaction.value),
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 25)),
-              Text(
-                'Selecione o tipo de chave do destinatário:',
-                style: Theme.of(context).textTheme.bodyText2,
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 10)),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    createChoiceChip('CPF/CNPJ', EnumPixKeyType.cpf_cnpj, 'choiceChipPixKeyCPFCNPJ'),
-                    const Padding(padding: EdgeInsets.only(left: 5)),
-                    createChoiceChip('Chave Aleatória', EnumPixKeyType.chave_aleatoria, 'choiceChipPixKeyAleatory'),
-                    const Padding(padding: EdgeInsets.only(left: 5)),
-                    createChoiceChip('Telefone', EnumPixKeyType.telefone, 'choiceChipPixKeyCellphone'),
-                    const Padding(padding: EdgeInsets.only(left: 5)),
-                    createChoiceChip('Email', EnumPixKeyType.email, 'choiceChipPixKeyEmail'),
-                  ],
-                ),
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 10)),
-              _textFieldRecipientKey()
-            ],
-          ))),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Para quem você deseja transferir?',
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                  const Padding(padding: EdgeInsets.only(bottom: 25)),
+                  Text(
+                    'O valor a ser transferido é de:',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    key: const Key('textValueTransfer'),
+                  ),
+                  const Padding(padding: EdgeInsets.only(bottom: 10)),
+                  Text(
+                    putCurrencyMask(widget.userTransaction.value),
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const Padding(padding: EdgeInsets.only(bottom: 25)),
+                  Text(
+                    'Selecione o tipo de chave do destinatário:',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const Padding(padding: EdgeInsets.only(bottom: 10)),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        createChoiceChip('CPF/CNPJ', EnumPixKeyType.cpf_cnpj, 'choiceChipPixKeyCPFCNPJ'),
+                        const Padding(padding: EdgeInsets.only(left: 5)),
+                        createChoiceChip('Chave Aleatória', EnumPixKeyType.chave_aleatoria, 'choiceChipPixKeyAleatory'),
+                        const Padding(padding: EdgeInsets.only(left: 5)),
+                        createChoiceChip('Telefone', EnumPixKeyType.telefone, 'choiceChipPixKeyCellphone'),
+                        const Padding(padding: EdgeInsets.only(left: 5)),
+                        createChoiceChip('Email', EnumPixKeyType.email, 'choiceChipPixKeyEmail'),
+                      ],
+                    ),
+                  ),
+                  const Padding(padding: EdgeInsets.only(bottom: 10)),
+                  _textFieldRecipientKey()
+                ],
+              ))),
     );
   }
 
@@ -119,10 +120,10 @@ class _PixTransferRecipientViewState extends State<PixTransferRecipientView> {
       controller: _recipientKeyController,
       decoration: InputDecoration(
         labelText: _keyMessage,
-        labelStyle: Theme.of(context).textTheme.bodyText2,
+        labelStyle: Theme.of(context).textTheme.bodyMedium,
         counterText: "",
       ),
-      style: Theme.of(context).textTheme.bodyText2,
+      style: Theme.of(context).textTheme.bodyMedium,
       onChanged: (text) {
         setState(() {
           if (text.isNotEmpty) {
@@ -174,6 +175,17 @@ class _PixTransferRecipientViewState extends State<PixTransferRecipientView> {
         }
         break;
       case EnumPixKeyType.email:
+        isValid = _validateEmailAccount(pixKeyValue);
+        userPixKey = await _verifyKey(pixKeyValue);
+        if (!isValid) {
+          if(!mounted) return null;
+          await showAlertDialog('Automação Fora da Caixa', 'A chave de email informada é inválida!', context, 'alertDialogTitle',
+              'alertDialogMessage', 'alertDialogButtonOk');
+        } else if (userPixKey == null) {
+          if(!mounted) return null;
+          await showAlertDialog('Automação Fora da Caixa', 'A chave de email informada não existe!', context, 'alertDialogTitle',
+              'alertDialogMessage', 'alertDialogButtonOk');
+        }
         break;
       case EnumPixKeyType.none:
         break;
@@ -194,6 +206,14 @@ class _PixTransferRecipientViewState extends State<PixTransferRecipientView> {
       return false;
     } else {
       return true;
+    }
+  }
+
+  bool _validateEmailAccount(String pixKeyValue){
+    if (EmailValidator.validate(pixKeyValue)) {
+      return true;
+    } else {
+      return false;
     }
   }
 
