@@ -24,4 +24,4 @@ gcloud firebase test android run --type instrumentation \
 
 # para pegar a lista de dispositivos disponíveis: gcloud firebase test android models list
 # para pegar o caminho do results-bucket, ir no firebase storage, e ver os detalhes do projeto. Copie a url criada
-13:40
+
